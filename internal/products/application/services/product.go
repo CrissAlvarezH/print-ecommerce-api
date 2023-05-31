@@ -5,10 +5,18 @@ import (
 	products "github.com/CrissAlvarezH/print-ecommerce-api/internal/products/domain"
 	users "github.com/CrissAlvarezH/print-ecommerce-api/internal/users/domain"
 	"github.com/Rhymond/go-money"
+	"log"
 )
 
 type ProductService struct {
-	repo ports.ProductRepository
+	repo    ports.ProductRepository
+	imgRepo ports.ImageRepository
+}
+
+func (s *ProductService) List(
+	filters map[string]string, include []string, limit int64, offset int64,
+) ([]products.Product, int64, error) {
+	return s.repo.List(filters, include, limit, offset, true)
 }
 
 func (s *ProductService) Add(
@@ -79,7 +87,58 @@ func (s *ProductService) Update(
 	return product, nil
 }
 
-func (s *ProductService) AttachImages(ID products.ProductID, images []products.ImageID) error {
-	// TODO: continue creating function on this service
-	return s.repo.AttachImages(ID, images)
+func (s *ProductService) AttachImages(ID products.ProductID, imageManager ports.ImageFilesManager) error {
+	imageFiles, err := imageManager.SaveAll()
+	if err != nil {
+		return err
+	}
+	imageIDs := make([]products.ImageID, 0, len(imageFiles))
+	for _, imgFile := range imageFiles {
+		image, err := s.imgRepo.Add(imgFile.Path, imgFile.Description, 0)
+		if err != nil {
+			log.Println("ERROR: on attach image", "path:", imgFile.Path, "err:", err)
+			continue
+		}
+		imageIDs = append(imageIDs, image.ID)
+	}
+	return s.repo.AttachImages(ID, imageIDs)
+}
+
+func (s *ProductService) DetachImages(
+	ID products.ProductID, imageIDs []products.ImageID, imageManager ports.ImageFilesManager,
+) error {
+	images, err := s.imgRepo.ListByIDs(imageIDs)
+	if err != nil {
+		return err
+	}
+
+	imageFilesDeleted := make([]products.ImageID, 0, len(images))
+	for _, img := range images {
+		err := imageManager.Delete(img.Path)
+		if err != nil {
+			return err
+		}
+		imageFilesDeleted = append(imageFilesDeleted, img.ID)
+	}
+	err = s.imgRepo.DeleteMany(imageFilesDeleted)
+	if err != nil {
+		return err
+	}
+
+	err = s.repo.DetachImages(ID, imageIDs)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *ProductService) UpdateImagePositions(
+	images []products.ProductImage,
+) error {
+	return s.imgRepo.UpdatePositions(images)
+}
+
+func (s *ProductService) Delete(ID products.ProductID) error {
+	return s.repo.MarkAsDelete(ID)
 }

@@ -1,4 +1,11 @@
 package ports
 
-type ImageManager interface {
+type ImageFile struct {
+	Path        string
+	Description string
+}
+
+type ImageFilesManager interface {
+	SaveAll() ([]ImageFile, error)
+	Delete(path string) error
 }

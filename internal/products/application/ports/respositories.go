@@ -7,7 +7,9 @@ import (
 )
 
 type ProductRepository interface {
-	List(filters map[string]string, include []string, limit int64, offset int64) ([]products.Product, error)
+	List(
+		filters map[string]string, include []string, limit int64, offset int64, getTotal bool,
+	) ([]products.Product, int64, error)
 	GetByID(ID products.ProductID) (products.Product, error)
 	Add(
 		sku string, name string, description string, price money.Money,
@@ -25,5 +27,12 @@ type ProductRepository interface {
 	UpdateProductAttributes(ID products.ProductID, productAttributes []products.ProductAttributeID) error
 	AttachImages(ID products.ProductID, images []products.ImageID) error
 	DetachImages(ID products.ProductID, images []products.ImageID) error
-	Delete(ID products.ProductID) error
+	MarkAsDelete(ID products.ProductID) error
+}
+
+type ImageRepository interface {
+	Add(path string, description string, position int8) (products.ProductImage, error)
+	ListByIDs(IDs []products.ImageID) ([]products.ProductImage, error)
+	DeleteMany(IDs []products.ImageID) error
+	UpdatePositions(images []products.ProductImage) error
 }
