@@ -2,7 +2,10 @@ module github.com/CrissAlvarezH/print-ecommerce-api
 
 go 1.20
 
-require github.com/gin-gonic/gin v1.9.0
+require (
+	github.com/Rhymond/go-money v1.0.9
+	github.com/gin-gonic/gin v1.9.0
+)
 
 require (
 	github.com/bytedance/sonic v1.9.0 // indirect
