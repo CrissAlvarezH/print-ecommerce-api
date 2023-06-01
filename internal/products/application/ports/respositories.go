@@ -8,7 +8,8 @@ import (
 
 type ProductRepository interface {
 	List(
-		filters map[string]string, include []string, limit int64, offset int64, getTotal bool,
+		filters map[string]string, tags []products.TagName, include []string,
+		limit int64, offset int64, withTotal bool,
 	) ([]products.Product, int64, error)
 	GetByID(ID products.ProductID) (products.Product, error)
 	Add(
@@ -66,4 +67,19 @@ type AttributeRepository interface {
 		ID products.AttributeID, name string, attributeType products.AttributeType,
 		options []products.AttributeOption,
 	)
+}
+
+type TagRepository interface {
+	List() ([]products.Tag, error)
+	Create(name products.TagName) (products.Tag, error)
+	Delete(name products.TagName) error
+}
+
+type TextSectionRepository interface {
+	List(limit int64, offset int64) ([]products.TextSection, int64, error)
+	Create(name string, content string, contentType products.TextSectionContentType) (products.TextSection, error)
+	Update(
+		ID products.TextSectionID, name string, content string, contentType products.TextSectionContentType,
+	) (products.TextSection, error)
+	Delete(ID products.TextSectionID) error
 }
