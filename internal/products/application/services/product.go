@@ -23,8 +23,8 @@ func (s *ProductService) Add(
 	sku string, name string, description string, price money.Money,
 	discountRate int8, inventoryStatus products.InventoryStatus,
 	createdBy users.UserID, variantParentID products.ProductID,
-	category products.CategoryName, tags []products.TagName,
-	textSections []products.TextSectionID, productAttributes []products.ProductAttributeID,
+	category products.CategoryID, tags []products.TagName,
+	textSections []products.TextSectionID, productAttributes []products.ProductAttribute,
 ) (products.Product, error) {
 	product, err := s.repo.Add(
 		sku, name, description, price, discountRate, inventoryStatus, createdBy,
@@ -38,8 +38,11 @@ func (s *ProductService) Add(
 		return products.Product{}, err
 	}
 
-	if err := s.repo.UpdateProductAttributes(product.ID, productAttributes); err != nil {
-		return products.Product{}, err
+	for _, pa := range productAttributes {
+		err := s.repo.AddProductAttribute(product.ID, pa.AttributeID, pa.AvailableOptions)
+		if err != nil {
+			return products.Product{}, err
+		}
 	}
 
 	if err := s.repo.UpdateTextSections(product.ID, textSections); err != nil {
@@ -60,8 +63,8 @@ func (s *ProductService) GetByID(ID products.ProductID) (products.Product, error
 func (s *ProductService) Update(
 	ID products.ProductID, sku string, name string, description string,
 	price money.Money, discountRate int8, inventoryStatus products.InventoryStatus,
-	category products.CategoryName, tags []products.TagName, textSections []products.TextSectionID,
-	productAttributes []products.ProductAttributeID,
+	category products.CategoryID, tags []products.TagName, textSections []products.TextSectionID,
+	productAttributes []products.ProductAttribute,
 ) (products.Product, error) {
 	product, err := s.repo.Update(ID, sku, name, description, price, discountRate, inventoryStatus, category)
 	if err != nil {
@@ -72,8 +75,21 @@ func (s *ProductService) Update(
 		return products.Product{}, err
 	}
 
-	if err := s.repo.UpdateProductAttributes(ID, productAttributes); err != nil {
+	// Delete all product attributes and insert new ones, with following conditions:
+	// Filter product attributes without ID, these will be inserted, otherwise will be updated
+	if err := s.repo.DeleteAllProductAttribute(ID); err != nil {
 		return products.Product{}, err
+	}
+	for _, pa := range productAttributes {
+		err = nil
+		if pa.ID == 0 {
+			err = s.repo.AddProductAttribute(product.ID, pa.AttributeID, pa.AvailableOptions)
+		} else {
+			err = s.repo.UpdateProductAttribute(product.ID, pa.ID, pa.AvailableOptions)
+		}
+		if err != nil {
+			return products.Product{}, err
+		}
 	}
 
 	if err := s.repo.UpdateTextSections(ID, textSections); err != nil {

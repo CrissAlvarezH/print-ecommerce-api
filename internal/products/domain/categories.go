@@ -1,14 +1,15 @@
 package products
 
-type CategoryName string
+type CategoryID int
 
 type Category struct {
-	Name           CategoryName
+	ID             CategoryID
+	Name           string
 	Description    string
-	ParentCategory CategoryName
+	ParentCategory *Category
 }
 
-func NewCategory(name CategoryName, Description string, parentCategory CategoryName) Category {
+func NewCategory(ID CategoryID, name string, Description string, parentCategory *Category) Category {
 	return Category{
 		Name:           name,
 		Description:    Description,

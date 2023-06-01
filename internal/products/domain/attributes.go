@@ -29,21 +29,19 @@ func NewAttribute(ID AttributeID, name string, attributeType AttributeType, opti
 type AttributeOptionID int64
 
 type AttributeOption struct {
-	ID          AttributeOptionID
-	Label       string
-	Value       string
-	ImgPath     string
-	AttributeID AttributeID
+	ID      AttributeOptionID
+	Label   string
+	Value   string
+	ImgPath string
 }
 
 func NewAttributeOption(
-	ID AttributeOptionID, label string, value string, imgPath string, attributeID AttributeID,
+	ID AttributeOptionID, label string, value string, imgPath string,
 ) AttributeOption {
 	return AttributeOption{
-		ID:          ID,
-		Label:       label,
-		Value:       value,
-		ImgPath:     imgPath,
-		AttributeID: attributeID,
+		ID:      ID,
+		Label:   label,
+		Value:   value,
+		ImgPath: imgPath,
 	}
 }

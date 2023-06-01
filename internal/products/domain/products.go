@@ -28,18 +28,18 @@ type Product struct {
 	CreatedAt         time.Time
 	CreatedBy         users.UserID
 	VariantParentID   ProductID
-	Category          CategoryName
+	Category          CategoryID
 	Tags              []Tag
 	TextSections      []TextSection
 	ProductAttributes []ProductAttribute
-	Images            []Image
+	Images            []ProductImage
 	DeletedAt         time.Time
 }
 
 func NewProduct(
 	ID ProductID, sku string, name string, description string, price money.Money, discountRate int8,
-	inventoryStatus InventoryStatus, createdBy users.UserID, variantParentID ProductID, category CategoryName,
-	tags []Tag, textSections []TextSection, productAttributes []ProductAttribute, images []Image,
+	inventoryStatus InventoryStatus, createdBy users.UserID, variantParentID ProductID, category CategoryID,
+	tags []Tag, textSections []TextSection, productAttributes []ProductAttribute, images []ProductImage,
 ) (Product, error) {
 	isLess, err := price.LessThan(money.New(0, money.COP))
 	if err != nil {
