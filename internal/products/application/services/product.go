@@ -14,9 +14,9 @@ type ProductService struct {
 }
 
 func (s *ProductService) List(
-	filters map[string]string, include []string, limit int64, offset int64,
+	filters map[string]string, tags []products.TagName, include []string, limit int64, offset int64,
 ) ([]products.Product, int64, error) {
-	return s.repo.List(filters, include, limit, offset, true)
+	return s.repo.List(filters, tags, include, limit, offset, true)
 }
 
 func (s *ProductService) Add(
