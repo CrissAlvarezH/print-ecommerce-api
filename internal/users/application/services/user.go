@@ -11,6 +11,7 @@ type UserService struct {
 	repo                    ports.UserRepository
 	addressRepo             ports.AddressRepository
 	verificationCodeManager ports.VerificationCodeManager
+	passwordManager         ports.PasswordManager
 }
 
 func (s *UserService) List(
@@ -24,9 +25,13 @@ func (s *UserService) GetByID(ID users.UserID) (users.User, error) {
 }
 
 func (s *UserService) Add(
-	name string, email string, phone string, isActive bool, scopes []users.ScopeName,
+	name string, email string, password string, phone string, isActive bool, scopes []users.ScopeName,
 ) (users.User, error) {
-	return s.repo.Add(name, email, phone, isActive, scopes)
+	hashPassword, err := s.passwordManager.Encrypt(password)
+	if err != nil {
+		return users.User{}, err
+	}
+	return s.repo.Add(name, email, hashPassword, phone, isActive, scopes)
 }
 
 func (s *UserService) Update(

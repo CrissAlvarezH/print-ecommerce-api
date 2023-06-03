@@ -5,7 +5,9 @@ import users "github.com/CrissAlvarezH/print-ecommerce-api/internal/users/domain
 type UserRepository interface {
 	List(filters map[string]string, scopes []users.ScopeName, limit int64, offset int64) ([]users.User, int64, error)
 	GetByID(ID users.UserID) (users.User, error)
-	Add(name string, email string, phone string, isActive bool, scopes []users.ScopeName) (users.User, error)
+	Add(
+		name string, email string, password string, phone string, isActive bool, scopes []users.ScopeName,
+	) (users.User, error)
 	Update(
 		ID users.UserID, name string, email string, phone string, isActive bool, scopes []users.ScopeName,
 	) (users.User, error)
